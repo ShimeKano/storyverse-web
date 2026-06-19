@@ -1,15 +1,55 @@
--- StoryVerse Database Schema
+CREATE TABLE Roles(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Name NVARCHAR(50) NOT NULL
+);
 
--- Roles
--- Users
--- Profiles
--- UserHearts
+CREATE TABLE Users(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    RoleId INT NOT NULL,
 
--- Stories
--- StoryNodes
--- StoryChoices
+    Username NVARCHAR(50) NOT NULL UNIQUE,
+    Email NVARCHAR(100) NOT NULL UNIQUE,
 
--- UserStoryProgress
--- UserStoryEndings
+    PasswordHash NVARCHAR(MAX) NOT NULL,
 
--- StoryRatings
+    IsVerified BIT DEFAULT 0,
+    IsBanned BIT DEFAULT 0,
+
+    CreatedAt DATETIME DEFAULT GETDATE(),
+
+    FOREIGN KEY(RoleId)
+    REFERENCES Roles(Id)
+);
+
+CREATE TABLE Profiles(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+
+    UserId INT UNIQUE NOT NULL,
+
+    DisplayName NVARCHAR(100),
+
+    AvatarUrl NVARCHAR(MAX),
+
+    Level INT DEFAULT 1,
+    Exp INT DEFAULT 0,
+
+    Gold INT DEFAULT 0,
+    Diamond INT DEFAULT 0,
+
+    FOREIGN KEY(UserId)
+    REFERENCES Users(Id)
+);
+
+CREATE TABLE UserHearts(
+    Id INT PRIMARY KEY IDENTITY(1,1),
+
+    UserId INT UNIQUE NOT NULL,
+
+    CurrentHearts INT DEFAULT 5,
+    MaxHearts INT DEFAULT 5,
+
+    LastRecoverTime DATETIME,
+
+    FOREIGN KEY(UserId)
+    REFERENCES Users(Id)
+);
