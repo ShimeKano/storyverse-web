@@ -1,0 +1,23 @@
+# Node
+node_modules/
+
+# Build
+dist/
+build/
+
+# Environment
+.env
+
+# Logs
+logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# VSCode
+.vscode/
+
+# Azure
+.azure/
