@@ -23,8 +23,10 @@ app.get("/", (req, res) => {
 });
 
 // ─── KẾT NỐI ROUTER (Sau này bạn viết code tới đâu thì mở comment tới đó) ───
-// app.use("/api/auth", require("./routes/auth.routes"));
-// app.use("/api/users", require("./routes/user.routes"));
+app.use("/api/auth", require("./routes/auth.routes"));
+app.use("/api/profile", require("./routes/profile.routes"));
+app.use("/api/admin", require("./routes/admin.routes"));
+app.use("/api/users", require("./routes/user.routes"));
 // app.use("/api/stories", require("./routes/story.routes"));
 // app.use("/api/game", require("./routes/game.routes"));
 
