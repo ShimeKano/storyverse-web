@@ -15,7 +15,23 @@ function isNonEmptyString(value) {
 }
 
 function validateEmail(email) {
-  return /^\S+@\S+\.\S+$/.test(String(email || '').trim());
+  const normalized = String(email || '').trim();
+  if (!normalized || normalized.length > 254 || normalized.includes(' ')) {
+    return false;
+  }
+
+  const atIndex = normalized.indexOf('@');
+  if (atIndex <= 0 || atIndex !== normalized.lastIndexOf('@')) {
+    return false;
+  }
+
+  const local = normalized.slice(0, atIndex);
+  const domain = normalized.slice(atIndex + 1);
+  if (!local || !domain || domain.startsWith('.') || domain.endsWith('.')) {
+    return false;
+  }
+
+  return domain.includes('.');
 }
 
 function normalizeRole(role) {
