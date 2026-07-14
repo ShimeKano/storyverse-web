@@ -1,0 +1,433 @@
+mục tiêu cuối cùng là:
+
+Game kinh dị nhiều kết
+RPG
+Tim dùng chung toàn hệ thống
+BXH
+Quảng cáo nhận tim
+Nạp tiền
+User tự đăng truyện
+Admin duyệt truyện
+Azure SQL
+
+thì mình khuyên thiết kế ERD ngay từ đầu khoảng 18 bảng để sau này không phải đập đi làm lại.
+
+ERD Tổng Quan
+Users
+ │
+ ├── Profiles
+ │
+ ├── UserHearts
+ │
+ ├── UserAchievements
+ │
+ ├── UserStoryProgress
+ │
+ ├── UserRPGCharacters
+ │
+ └── Transactions
+
+Stories
+ │
+ ├── StoryNodes
+ │
+ ├── StoryChoices
+ │
+ ├── StoryTags
+ │
+ └── StoryRatings
+
+Advertisements
+ │
+ └── AdRewards
+
+Payments
+ │
+ └── Transactions
+
+Leaderboards
+
+Roles
+1. Roles
+Roles
+-----
+Id
+Name
+
+Dữ liệu:
+
+1 Admin
+2 Manager
+3 Player
+2. Users
+Users
+-----
+Id
+RoleId
+
+Username
+Email
+
+PasswordHash
+
+IsVerified
+IsBanned
+
+CreatedAt
+LastLogin
+3. Profiles
+Profiles
+--------
+Id
+UserId
+
+DisplayName
+AvatarUrl
+
+Level
+Exp
+
+Gold
+Diamond
+
+CreatedAt
+4. UserHearts
+
+Tách riêng để sau này dễ mở rộng.
+
+UserHearts
+----------
+Id
+UserId
+
+CurrentHearts
+MaxHearts
+
+LastRecoverTime
+
+Ví dụ:
+
+5/5 tim
+30 phút hồi 1 tim
+5. Stories
+Stories
+--------
+Id
+
+AuthorId
+
+Title
+Description
+
+Thumbnail
+
+Type
+
+Status
+
+Views
+
+CreatedAt
+UpdatedAt
+
+Type
+
+HORROR
+RPG
+
+Status
+
+DRAFT
+PENDING
+APPROVED
+REJECTED
+6. StoryNodes
+
+Mỗi đoạn nội dung.
+
+StoryNodes
+----------
+Id
+StoryId
+
+Title
+Content
+
+IsStart
+IsEnding
+
+EndingType
+
+Ví dụ:
+
+GOOD_END
+BAD_END
+SECRET_END
+7. StoryChoices
+
+Thay vì Choice1 Choice2 Choice3.
+
+StoryChoices
+------------
+Id
+
+NodeId
+
+ChoiceText
+
+NextNodeId
+
+HeartCost
+
+ExpReward
+
+Ví dụ:
+
+Mở cửa
+↓
+Node 12
+8. StoryTags
+StoryTags
+---------
+Id
+Name
+
+Ví dụ:
+
+Horror
+Ghost
+Zombie
+Mystery
+RPG
+Fantasy
+9. StoryTagMap
+StoryTagMap
+-----------
+StoryId
+TagId
+
+Many-to-many.
+
+10. StoryRatings
+StoryRatings
+------------
+Id
+
+StoryId
+UserId
+
+Stars
+
+Comment
+
+CreatedAt
+11. UserStoryProgress
+
+Lưu tiến trình.
+
+UserStoryProgress
+-----------------
+Id
+
+UserId
+StoryId
+
+CurrentNodeId
+
+Completed
+
+LastPlayed
+12. UserStoryEndings
+
+Lưu ending đã mở.
+
+UserStoryEndings
+----------------
+Id
+
+UserId
+StoryId
+
+EndingNodeId
+
+UnlockedAt
+13. UserAchievements
+UserAchievements
+----------------
+Id
+
+UserId
+
+AchievementCode
+
+UnlockedAt
+
+Ví dụ:
+
+FIRST_ENDING
+GHOST_HUNTER
+TOP_PLAYER
+14. UserRPGCharacters
+
+Cho phần RPG sau này.
+
+UserRPGCharacters
+-----------------
+Id
+
+UserId
+
+Name
+
+Level
+Exp
+
+HP
+MP
+
+Attack
+Defense
+
+Gold
+15. RPGInventory
+RPGInventory
+------------
+Id
+
+CharacterId
+
+ItemId
+
+Quantity
+16. RPGItems
+RPGItems
+--------
+Id
+
+Name
+
+Type
+
+AttackBonus
+DefenseBonus
+
+Price
+17. Advertisements
+Advertisements
+--------------
+Id
+
+Title
+
+RewardHeart
+
+RewardGold
+
+Enabled
+18. AdRewards
+
+Lưu lịch sử xem quảng cáo.
+
+AdRewards
+---------
+Id
+
+UserId
+
+AdvertisementId
+
+RewardAt
+19. Payments
+Payments
+--------
+Id
+
+Name
+
+Price
+
+HeartReward
+
+DiamondReward
+
+Ví dụ:
+
+20k
++10 tim
+
+50k
++50 kim cương
+20. Transactions
+Transactions
+------------
+Id
+
+UserId
+
+PaymentId
+
+Amount
+
+Status
+
+CreatedAt
+21. Leaderboards
+
+Thực tế bảng này có thể không cần.
+
+Tạo View là đủ.
+
+vwLeaderboard
+SELECT
+Username,
+Level,
+Exp
+FROM Profiles
+ORDER BY Exp DESC
+Quan hệ chính
+Users
+ │
+ ├── Profiles (1-1)
+ ├── UserHearts (1-1)
+ ├── UserStoryProgress (1-N)
+ ├── UserStoryEndings (1-N)
+ ├── UserAchievements (1-N)
+ ├── Transactions (1-N)
+ │
+ └── UserRPGCharacters (1-N)
+
+Stories
+ │
+ ├── StoryNodes (1-N)
+ ├── StoryRatings (1-N)
+ └── StoryTagMap (1-N)
+
+StoryNodes
+ │
+ └── StoryChoices (1-N)
+
+Advertisements
+ │
+ └── AdRewards (1-N)
+
+Payments
+ │
+ └── Transactions (1-N)
+Một cải tiến rất đáng làm
+
+Thêm bảng:
+
+StoryVersions
+-------------
+Id
+StoryId
+VersionNumber
+PublishedAt
+
+Khi tác giả sửa truyện đã xuất bản:
+
+Không ảnh hưởng người đang chơi
+Có thể rollback
+Giống Git cho truyện
+
+Đây là kiểu kiến trúc đủ để mở rộng thành một web kiểu visual novel/RPG cộng đồng, có thể chứa hàng chục nghìn truyện mà không phải thay đổi database lớn về sau.

@@ -1,0 +1,368 @@
+hệ thống game web hoàn chỉnh chạy trên Azure, source trên GitHub, thì nên thiết kế theo hướng web app hiện đại thay vì làm từng trang HTML riêng lẻ.
+
+1. Kiến trúc tổng thể
+GitHub
+   │
+   ▼
+GitHub Actions (CI/CD)
+   │
+   ▼
+Azure Static Web Apps (Frontend)
+   │
+   ▼
+Azure App Service (Backend API)
+   │
+   ▼
+Azure SQL Database
+   │
+   ├── User
+   ├── Profile
+   ├── Heart/Life
+   ├── RPG Character
+   ├── Horror Stories
+   ├── RPG Stories
+   ├── Rankings
+   ├── Payments
+   └── Advertisements
+
+Công nghệ đề xuất:
+
+Thành phần	Công nghệ
+Frontend	React + Vite
+Backend	Node.js + Express
+Database	Azure SQL
+Authentication	JWT
+Storage	Azure Blob Storage
+CI/CD	GitHub Actions
+Hosting	Azure Static Web Apps + Azure App Service
+2. Chức năng hệ thống
+Người chơi
+Đăng ký
+Đăng nhập
+Quên mật khẩu
+Hồ sơ cá nhân
+Avatar
+Điểm kinh nghiệm
+Tim (Life)
+Chơi game
+Game kinh dị
+
+Dạng Visual Novel.
+
+Ví dụ:
+
+Bạn nghe tiếng gõ cửa.
+
+[ Mở cửa ]
+[ Trốn ]
+[ Gọi cảnh sát ]
+
+Mỗi lựa chọn dẫn tới:
+
+Node khác
+
+=> nhiều ending.
+
+Game RPG
+Level
+EXP
+Trang bị
+Kỹ năng
+Nhiệm vụ
+Tim (Life)
+
+Ví dụ:
+
+Max 5 tim
+
+1 lượt chơi:
+-1 tim
+
+Hết tim:
+
+Xem quảng cáo
+hoặc
+Nạp tiền
+Bảng xếp hạng
+Theo level
+Theo điểm
+Theo số ending
+Trang đăng truyện
+
+Người dùng được tạo:
+
+Truyện kinh dị
+Truyện RPG
+
+Duyệt bởi quản lý trước khi public.
+
+Hệ thống vai trò
+Admin
+
+Toàn quyền
+
+Quản lý user
+Quản lý truyện
+Quản lý game
+Quản lý nạp tiền
+Manager
+Duyệt truyện
+Khóa truyện
+Xóa truyện
+Player
+Chơi game
+Đăng truyện
+Xem BXH
+3. Cấu trúc thư mục đầy đủ
+project-root/
+
+├── .github/
+│   └── workflows/
+│       ├── frontend.yml
+│       └── backend.yml
+
+├── frontend/
+
+├── backend/
+
+├── database/
+
+├── docs/
+
+├── assets/
+
+└── README.md
+4. Frontend
+frontend/
+
+src/
+
+├── main.jsx
+├── App.jsx
+
+├── api/
+│   ├── authApi.js
+│   ├── userApi.js
+│   ├── storyApi.js
+│   ├── gameApi.js
+│   └── rankingApi.js
+
+├── routes/
+│   ├── PublicRoute.jsx
+│   ├── PrivateRoute.jsx
+│   └── AdminRoute.jsx
+
+├── pages/
+
+│   ├── auth/
+│   │   ├── Login.jsx
+│   │   ├── Register.jsx
+│   │   └── ForgotPassword.jsx
+
+│   ├── home/
+│   │   └── Home.jsx
+
+│   ├── profile/
+│   │   └── Profile.jsx
+
+│   ├── ranking/
+│   │   └── Ranking.jsx
+
+│   ├── horror/
+│   │   ├── HorrorList.jsx
+│   │   ├── HorrorPlay.jsx
+│   │   └── HorrorEnding.jsx
+
+│   ├── rpg/
+│   │   ├── RPGHome.jsx
+│   │   ├── RPGCharacter.jsx
+│   │   ├── RPGBattle.jsx
+│   │   └── RPGInventory.jsx
+
+│   ├── stories/
+│   │   ├── CreateStory.jsx
+│   │   ├── EditStory.jsx
+│   │   └── MyStories.jsx
+
+│   ├── admin/
+│   │   ├── Dashboard.jsx
+│   │   ├── Users.jsx
+│   │   ├── Stories.jsx
+│   │   └── Payments.jsx
+
+├── components/
+
+│   ├── Navbar.jsx
+│   ├── Footer.jsx
+│   ├── Sidebar.jsx
+│   ├── HeartBar.jsx
+│   ├── UserCard.jsx
+│   ├── StoryCard.jsx
+│   └── RankingTable.jsx
+
+├── context/
+
+│   ├── AuthContext.jsx
+│   └── UserContext.jsx
+
+├── hooks/
+
+│   ├── useAuth.js
+│   ├── useHeart.js
+│   └── useStory.js
+
+├── utils/
+
+│   ├── jwt.js
+│   ├── constants.js
+│   └── helper.js
+
+└── styles/
+5. Backend
+backend/
+
+src/
+
+├── server.js
+
+├── config/
+│   ├── database.js
+│   ├── jwt.js
+│   └── azure.js
+
+├── middleware/
+│   ├── auth.js
+│   ├── admin.js
+│   ├── manager.js
+│   └── errorHandler.js
+
+├── routes/
+
+│   ├── auth.routes.js
+│   ├── user.routes.js
+│   ├── story.routes.js
+│   ├── game.routes.js
+│   ├── ranking.routes.js
+│   ├── payment.routes.js
+│   └── admin.routes.js
+
+├── controllers/
+
+│   ├── auth.controller.js
+│   ├── user.controller.js
+│   ├── story.controller.js
+│   ├── game.controller.js
+│   ├── ranking.controller.js
+│   ├── payment.controller.js
+│   └── admin.controller.js
+
+├── services/
+
+│   ├── auth.service.js
+│   ├── user.service.js
+│   ├── story.service.js
+│   ├── game.service.js
+│   └── ranking.service.js
+
+├── models/
+
+│   ├── User.js
+│   ├── Profile.js
+│   ├── Heart.js
+│   ├── Story.js
+│   ├── StoryNode.js
+│   ├── RPGCharacter.js
+│   ├── Inventory.js
+│   ├── Ranking.js
+│   └── Payment.js
+
+└── uploads/
+6. Database
+database/
+
+├── schema.sql
+├── seed.sql
+
+├── tables/
+
+│   ├── users.sql
+│   ├── profiles.sql
+│   ├── hearts.sql
+│   ├── stories.sql
+│   ├── story_nodes.sql
+│   ├── rankings.sql
+│   ├── payments.sql
+│   └── inventory.sql
+7. Bảng dữ liệu chính
+Users
+id
+username
+email
+password_hash
+role
+created_at
+Profiles
+user_id
+avatar
+level
+exp
+heart
+gold
+Stories
+id
+author_id
+title
+type
+status
+created_at
+
+type:
+
+HORROR
+RPG
+StoryNodes
+id
+story_id
+content
+choice_1
+next_1
+choice_2
+next_2
+choice_3
+next_3
+ending
+
+Đây là bảng cực kỳ quan trọng vì toàn bộ game lựa chọn nhiều kết sẽ chạy bằng bảng này.
+
+8. CI/CD GitHub Actions
+.github/workflows/
+
+frontend.yml
+backend.yml
+
+Khi push:
+
+git push
+    ↓
+GitHub
+    ↓
+Action Build
+    ↓
+Deploy Azure
+9. Giai đoạn phát triển
+Phase 1
+Đăng ký
+Đăng nhập
+Hồ sơ
+Tim
+Phase 2
+Game kinh dị nhiều kết
+Phase 3
+RPG
+Phase 4
+BXH
+Phase 5
+Nạp tiền
+Quảng cáo
+Phase 6
+CMS tạo truyện kéo-thả node
