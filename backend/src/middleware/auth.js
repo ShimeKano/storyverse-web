@@ -1,28 +1,45 @@
-const jwt = require("jsonwebtoken");
-const jwtConfig = require("../config/jwt");
+const jwt = require('jsonwebtoken');
+const jwtConfig = require('../config/jwt');
+const { AppError } = require('../lib/errors');
 
-const authMiddleware = (req, res, next) => {
-  // 1. Lấy token từ header "Authorization" (Định dạng chuẩn: Bearer <token>)
+function parseAuthToken(req) {
   const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "No token provided, authorization denied" });
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return null;
   }
 
-  const token = authHeader.split(" ")[1];
+  return authHeader.slice('Bearer '.length).trim();
+}
 
+function authRequired(req, res, next) {
   try {
-    // 2. Giải mã và xác thực tính hợp lệ của token
-    const decoded = jwt.verify(token, jwtConfig.secret);
+    const token = parseAuthToken(req);
+    if (!token) {
+      throw new AppError('No token provided', 401);
+    }
 
-    // 3. Đính kèm thông tin user (id, username, role) vào đối tượng request (req.user)
-    // Để các controller phía sau có thể dễ dàng lấy ra sử dụng
-    req.user = decoded;
-
-    next(); // Cho phép đi tiếp vào Controller xử lý chính
+    req.user = jwt.verify(token, jwtConfig.secret);
+    next();
   } catch (error) {
-    return res.status(401).json({ message: "Token is not valid or has expired" });
+    next(error.isOperational ? error : new AppError('Token is invalid or expired', 401));
   }
-};
+}
 
-module.exports = authMiddleware;
+function authOptional(req, res, next) {
+  try {
+    const token = parseAuthToken(req);
+    if (!token) {
+      return next();
+    }
+
+    req.user = jwt.verify(token, jwtConfig.secret);
+    next();
+  } catch (error) {
+    next(new AppError('Token is invalid or expired', 401));
+  }
+}
+
+module.exports = {
+  authRequired,
+  authOptional
+};

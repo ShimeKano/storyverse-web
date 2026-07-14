@@ -1,25 +1,30 @@
-# Authentication
+# API Design
 
-POST /api/auth/register
+## Auth
+- `POST /api/auth/register`
+- `POST /api/auth/login`
 
-POST /api/auth/login
+## Player Profile
+- `GET /api/profile/me` (auth)
+- `PUT /api/profile/me` (auth)
 
-GET /api/auth/me
+## Stories (Upload/CMS)
+- `GET /api/stories` (public approved, auth can query own drafts)
+- `GET /api/stories/:id`
+- `POST /api/stories` (auth)
+- `PUT /api/stories/:id` (owner/admin/manager)
+- `POST /api/stories/:id/submit` (owner)
+- `DELETE /api/stories/:id` (owner/admin/manager with policy)
 
-# Stories
+## Gameplay
+- `GET /api/game/:storyId/start` (auth, consumes 1 heart)
+- `POST /api/game/:storyId/choice` (auth)
 
-GET /api/stories
+## Leaderboard
+- `GET /api/ranking`
 
-GET /api/stories/:id
-
-POST /api/stories
-
-PUT /api/stories/:id
-
-DELETE /api/stories/:id
-
-# Story Play
-
-GET /api/play/:storyId/start
-
-POST /api/play/choice
+## Admin / Manager
+- `GET /api/users` (manager/admin)
+- `POST /api/users/ban` (manager/admin)
+- `POST /api/admin/gift-hearts` (manager/admin)
+- `POST /api/admin/stories/:id/review` (manager/admin)

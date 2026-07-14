@@ -1,35 +1,55 @@
-const sql = require("mssql");
-require("dotenv").config();
+const sql = require('mssql');
+const env = require('./env');
 
-const config = {
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  server: process.env.DB_SERVER, // Ví dụ: your-server.database.windows.net
-  database: process.env.DB_NAME,
-  port: 1433,
-  options: {
-    encrypt: true, // Bắt buộc phải bằng true khi kết nối Azure SQL
-    trustServerCertificate: false
-  },
-  pool: {
-    max: 10,
-    min: 0,
-    idleTimeoutMillis: 30000
+const hasAzureSqlConfig = Boolean(
+  env.AZURE_SQL.server && env.AZURE_SQL.database && env.AZURE_SQL.user && env.AZURE_SQL.password
+);
+
+let poolPromise;
+
+function getAzureSqlConfig() {
+  return {
+    user: env.AZURE_SQL.user,
+    password: env.AZURE_SQL.password,
+    server: env.AZURE_SQL.server,
+    database: env.AZURE_SQL.database,
+    port: 1433,
+    options: {
+      encrypt: true,
+      trustServerCertificate: false
+    },
+    pool: {
+      max: 10,
+      min: 0,
+      idleTimeoutMillis: 30000
+    }
+  };
+}
+
+async function getPool() {
+  if (!env.AZURE_SQL.enabled || !hasAzureSqlConfig) {
+    return null;
   }
-};
 
-const poolPromise = new sql.ConnectionPool(config)
-  .connect()
-  .then(pool => {
-    console.log("🔌 Connected to Azure SQL Database successfully!");
-    return pool;
-  })
-  .catch(err => {
-    console.error("❌ Database Connection Failed: ", err);
-    process.exit(1);
-  });
+  if (!poolPromise) {
+    poolPromise = new sql.ConnectionPool(getAzureSqlConfig())
+      .connect()
+      .then((pool) => {
+        console.log('🔌 Connected to Azure SQL Database');
+        return pool;
+      })
+      .catch((error) => {
+        console.error('❌ Azure SQL connection failed, fallback to local data store:', error.message);
+        poolPromise = null;
+        return null;
+      });
+  }
+
+  return poolPromise;
+}
 
 module.exports = {
   sql,
-  poolPromise
+  getPool,
+  hasAzureSqlConfig
 };

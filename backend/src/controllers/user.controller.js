@@ -1,31 +1,29 @@
-const userService = require("../services/user.service");
+const userService = require('../services/user.service');
+const { AppError } = require('../lib/errors');
 
 class UserController {
-  // Admin/Manager lấy danh sách tất cả người dùng
   async listAllUsers(req, res, next) {
     try {
       const users = await userService.getAllUsers();
-      res.status(200).json({
-        message: "Fetch all users successfully",
-        data: users
-      });
+      res.status(200).json({ message: 'Fetch users successfully', data: users });
     } catch (error) {
       next(error);
     }
   }
 
-  // Admin/Manager thực hiện khóa hoặc mở khóa tài khoản
   async updateBanStatus(req, res, next) {
     try {
       const { targetUserId, isBanned } = req.body;
-      if (targetUserId === req.user.id) {
-        return res.status(400).json({ message: "You cannot ban yourself!" });
+      if (!targetUserId) {
+        throw new AppError('targetUserId is required', 400);
       }
 
-      await userService.toggleBanUser(targetUserId, isBanned);
-      res.status(200).json({
-        message: `User status updated successfully. Banned: ${isBanned}`
-      });
+      if (Number(targetUserId) === req.user.id) {
+        throw new AppError('You cannot ban yourself', 400);
+      }
+
+      const user = await userService.toggleBanUser(targetUserId, isBanned);
+      res.status(200).json({ message: 'User ban status updated', data: user });
     } catch (error) {
       next(error);
     }

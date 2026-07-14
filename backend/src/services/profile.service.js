@@ -1,111 +1,121 @@
-const { sql, poolPromise } = require("../config/database");
+const env = require('../config/env');
+const { AppError } = require('../lib/errors');
+const { mutateLocalData } = require('./data.service');
+
+function recoverHearts(hearts) {
+  const now = new Date();
+  const lastRecover = new Date(hearts.lastRecoverTime || now);
+  const elapsedMinutes = Math.floor((now - lastRecover) / 60000);
+
+  if (hearts.currentHearts >= hearts.maxHearts) {
+    hearts.lastRecoverTime = now.toISOString();
+    return hearts;
+  }
+
+  if (elapsedMinutes >= env.HEART_RECOVER_MINUTES) {
+    const recovered = Math.floor(elapsedMinutes / env.HEART_RECOVER_MINUTES);
+    hearts.currentHearts = Math.min(hearts.maxHearts, hearts.currentHearts + recovered);
+    const remainder = elapsedMinutes % env.HEART_RECOVER_MINUTES;
+    hearts.lastRecoverTime = new Date(now.getTime() - remainder * 60000).toISOString();
+  }
+
+  return hearts;
+}
 
 class ProfileService {
-  // Hàm bổ trợ tự động tính toán và hồi phục Tim theo thời gian
-  async refreshUserHearts(pool, userId) {
-    const heartResult = await pool.request()
-      .input("userId", sql.Int, userId)
-      .query("SELECT CurrentHearts, MaxHearts, LastRecoverTime FROM UserHearts WHERE UserId = @userId");
-
-    const heartData = heartResult.recordset[0];
-    if (!heartData) return null;
-
-    let { CurrentHearts, MaxHearts, LastRecoverTime } = heartData;
-
-    // Nếu tim đã đầy thì không cần tính toán hồi phục, cập nhật lại mốc thời gian hiện tại
-    if (CurrentHearts >= MaxHearts) {
-      await pool.request()
-        .input("userId", sql.Int, userId)
-        .input("now", sql.DateTime, new Date())
-        .query("UPDATE UserHearts SET LastRecoverTime = @now WHERE UserId = @userId");
-      return { currentHearts: CurrentHearts, maxHearts: MaxHearts };
-    }
-
-    const now = new Date();
-    const lastRecover = new Date(LastRecoverTime);
-    const diffMs = now - lastRecover;
-    const diffMinutes = Math.floor(diffMs / (1000 * 60)); // Đổi ra số phút
-
-    const MINUTES_PER_HEART = 15; // Quy định: Cứ 15 phút hồi 1 Tim
-
-    if (diffMinutes >= MINUTES_PER_HEART) {
-      const heartsToRecover = Math.floor(diffMinutes / MINUTES_PER_HEART);
-      CurrentHearts = Math.min(MaxHearts, CurrentHearts + heartsToRecover);
-
-      // Tính toán mốc thời gian thừa còn lại để làm mốc cho lần hồi tiếp theo
-      const remainderMinutes = diffMinutes % MINUTES_PER_HEART;
-      const newRecoverTime = new Date(now.getTime() - (remainderMinutes * 60 * 1000));
-
-      await pool.request()
-        .input("userId", sql.Int, userId)
-        .input("currentHearts", sql.Int, CurrentHearts)
-        .input("newRecoverTime", sql.DateTime, newRecoverTime)
-        .query(`
-          UPDATE UserHearts 
-          SET CurrentHearts = @currentHearts, LastRecoverTime = @newRecoverTime 
-          WHERE UserId = @userId
-        `);
-    }
-
-    return { currentHearts: CurrentHearts, maxHearts: MaxHearts };
-  }
-
-  // Hàm lấy thông tin Profile chi tiết kết hợp gọi hàm hồi Tim
   async getProfileData(userId) {
-    const pool = await poolPromise;
+    return mutateLocalData(async (db) => {
+      const profile = db.profiles.find((item) => item.userId === userId);
+      const hearts = db.hearts.find((item) => item.userId === userId);
+      if (!profile || !hearts) {
+        throw new AppError('Profile not found', 404);
+      }
 
-    // 1. Chạy cơ chế tự động hồi Tim trước
-    const hearts = await this.refreshUserHearts(pool, userId);
+      const inventory = db.inventory.filter((item) => item.userId === userId);
+      const progress = db.progress.filter((item) => item.userId === userId);
+      const endings = db.endings.filter((item) => item.userId === userId);
 
-    // 2. Lấy thông tin Profile của User
-    const profileResult = await pool.request()
-      .input("userId", sql.Int, userId)
-      .query(`
-        SELECT DisplayName, AvatarUrl, Level, Exp, Gold, Diamond 
-        FROM Profiles 
-        WHERE UserId = @userId
-      `);
-
-    const profile = profileResult.recordset[0];
-
-    return {
-      profile,
-      hearts
-    };
-  }
-  // Thêm vào trong class ProfileService
-async addHearts(userId, amount, allowOverflow = false) {
-  const pool = await poolPromise;
-
-  // Lấy trạng thái tim hiện tại
-  const result = await pool.request()
-    .input("userId", sql.Int, userId)
-    .query("SELECT CurrentHearts, MaxHearts FROM UserHearts WHERE UserId = @userId");
-
-  const heartData = result.recordset[0];
-  if (!heartData) throw new Error("User hearts record not found");
-
-  let { CurrentHearts, MaxHearts } = heartData;
-  let newHearts = CurrentHearts + amount;
-
-  // Nếu xem quảng cáo (không cho phép tràn tim): chặn lại ở MaxHearts
-  // Nếu nạp tiền hoặc Admin cấp (allowOverflow = true): cho phép vượt MaxHearts (ví dụ: 99/5 tim)
-  if (!allowOverflow && newHearts > MaxHearts) {
-    newHearts = MaxHearts;
+      return {
+        profile,
+        hearts: recoverHearts(hearts),
+        inventory,
+        progress,
+        endings
+      };
+    });
   }
 
-  await pool.request()
-    .input("userId", sql.Int, userId)
-    .input("newHearts", sql.Int, newHearts)
-    .input("now", sql.DateTime, new Date())
-    .query(`
-      UPDATE UserHearts 
-      SET CurrentHearts = @newHearts, LastRecoverTime = @now 
-      WHERE UserId = @userId
-    `);
+  async updateProfile(userId, payload) {
+    return mutateLocalData(async (db) => {
+      const profile = db.profiles.find((item) => item.userId === userId);
+      if (!profile) {
+        throw new AppError('Profile not found', 404);
+      }
 
-  return { currentHearts: newHearts, maxHearts: MaxHearts };
-}
+      if (typeof payload.displayName === 'string' && payload.displayName.trim()) {
+        profile.displayName = payload.displayName.trim();
+      }
+
+      if (typeof payload.avatarUrl === 'string') {
+        profile.avatarUrl = payload.avatarUrl.trim();
+      }
+
+      return profile;
+    });
+  }
+
+  async consumeHeart(userId) {
+    return mutateLocalData(async (db) => {
+      const hearts = db.hearts.find((item) => item.userId === userId);
+      if (!hearts) {
+        throw new AppError('Heart data not found', 404);
+      }
+
+      recoverHearts(hearts);
+      if (hearts.currentHearts <= 0) {
+        throw new AppError('Not enough hearts. Wait for recovery.', 400);
+      }
+
+      hearts.currentHearts -= 1;
+      hearts.lastRecoverTime = new Date().toISOString();
+      return hearts;
+    });
+  }
+
+  async addHearts(userId, amount, allowOverflow = false) {
+    return mutateLocalData(async (db) => {
+      const hearts = db.hearts.find((item) => item.userId === Number(userId));
+      if (!hearts) {
+        throw new AppError('Heart data not found', 404);
+      }
+
+      const parsedAmount = Number(amount);
+      if (!Number.isFinite(parsedAmount) || parsedAmount === 0) {
+        throw new AppError('Invalid amount', 400);
+      }
+
+      hearts.currentHearts += parsedAmount;
+      if (!allowOverflow) {
+        hearts.currentHearts = Math.min(hearts.currentHearts, hearts.maxHearts);
+      }
+      hearts.currentHearts = Math.max(0, hearts.currentHearts);
+      hearts.lastRecoverTime = new Date().toISOString();
+      return hearts;
+    });
+  }
+
+  async addExp(userId, expReward) {
+    return mutateLocalData(async (db) => {
+      const profile = db.profiles.find((item) => item.userId === userId);
+      if (!profile) {
+        throw new AppError('Profile not found', 404);
+      }
+
+      profile.exp += expReward;
+      profile.level = 1 + Math.floor(profile.exp / 100);
+      return profile;
+    });
+  }
 }
 
 module.exports = new ProfileService();

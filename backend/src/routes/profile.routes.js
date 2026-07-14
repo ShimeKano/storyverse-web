@@ -1,9 +1,10 @@
-const express = require("express");
+const express = require('express');
+const profileController = require('../controllers/profile.controller');
+const { authRequired } = require('../middleware/auth');
+
 const router = express.Router();
-const profileController = require("../controllers/profile.controller");
-const auth = require("../middleware/auth"); // Gọi middleware kiểm tra token
 
-// Endpoint GET /api/profile/me (Yêu cầu phải gửi kèm Token hợp lệ ở Header)
-router.get("/me", auth, profileController.getMyProfile);
+router.get('/me', authRequired, profileController.getMyProfile);
+router.put('/me', authRequired, profileController.updateMyProfile);
 
-module.exports = router;    
+module.exports = router;

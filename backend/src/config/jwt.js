@@ -1,6 +1,6 @@
-require("dotenv").config();
+const env = require('./env');
 
 module.exports = {
-  secret: process.env.JWT_SECRET || "storyverse_super_secret_key_2026",
-  expiresIn: "7d" // Token có hiệu lực trong 7 ngày
+  secret: env.JWT_SECRET,
+  expiresIn: env.JWT_EXPIRES_IN
 };
