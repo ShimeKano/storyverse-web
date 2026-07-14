@@ -1,0 +1,106 @@
+:root {
+  font-family: Inter, system-ui, Arial, sans-serif;
+  color: #f6f6f6;
+  background: #101018;
+}
+
+body {
+  margin: 0;
+}
+
+.app-shell {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+nav,
+.auth-box {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+a {
+  color: #91b4ff;
+  text-decoration: none;
+}
+
+a.active {
+  color: #ffd56a;
+}
+
+main {
+  margin-top: 1rem;
+}
+
+.card {
+  background: #1b1b28;
+  border: 1px solid #2f2f45;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.grid-two {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+input,
+textarea,
+button {
+  border-radius: 6px;
+  border: 1px solid #4a4a68;
+  padding: 0.5rem 0.7rem;
+  background: #141422;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+ul {
+  padding-left: 1rem;
+}
+
+li {
+  margin-bottom: 0.5rem;
+}
+
+.choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border-bottom: 1px solid #373754;
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.error {
+  color: #ff9f9f;
+}

@@ -1,16 +1,11 @@
-const express = require("express");
+const express = require('express');
+const authController = require('../controllers/auth.controller');
+
+const rateLimit = require('express-rate-limit');
 const router = express.Router();
-const authController = require("../controllers/auth.controller");
+router.use(rateLimit({ windowMs: 60 * 1000, max: 120, standardHeaders: true, legacyHeaders: false }));
 
-// Route test hiện tại của bạn (GET /api/auth)
-router.get("/", (req, res) => {
-    res.json({
-        message: "Auth route"
-    });
-});
+router.post('/register', authController.register);
+router.post('/login', authController.login);
 
-// Route Đăng ký tài khoản mới (POST /api/auth/register)
-router.post("/register", authController.register);
-// Route Đăng nhập (POST /api/auth/login)
-router.post("/login", authController.login);
 module.exports = router;

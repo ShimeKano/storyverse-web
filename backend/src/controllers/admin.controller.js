@@ -1,21 +1,21 @@
-const profileService = require("../services/profile.service");
+const profileService = require('../services/profile.service');
+const storyService = require('../services/story.service');
 
 class AdminController {
   async giftHeartsToPlayer(req, res, next) {
     try {
-      const { targetUserId, amount } = req.body;
+      const { targetUserId, amount, allowOverflow } = req.body;
+      const updated = await profileService.addHearts(targetUserId, amount, Boolean(allowOverflow));
+      res.status(200).json({ message: 'Hearts updated successfully', data: updated });
+    } catch (error) {
+      next(error);
+    }
+  }
 
-      if (!targetUserId || !amount) {
-        return res.status(400).json({ message: "targetUserId and amount are required" });
-      }
-
-      // Admin cấp tim thì cho phép tràn tim (allowOverflow = true)
-      const updatedHearts = await profileService.addHearts(targetUserId, parseInt(amount), true);
-
-      res.status(200).json({
-        message: `Successfully gifted ${amount} hearts to user ID ${targetUserId}! 🎁`,
-        data: updatedHearts
-      });
+  async reviewStory(req, res, next) {
+    try {
+      const story = await storyService.reviewStory(req.user, req.params.id, req.body);
+      res.status(200).json({ message: 'Story reviewed successfully', data: story });
     } catch (error) {
       next(error);
     }

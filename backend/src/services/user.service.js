@@ -1,27 +1,33 @@
-const { sql, poolPromise } = require("../config/database");
-const bcrypt = require("bcryptjs");
+const { AppError } = require('../lib/errors');
+const { mutateLocalData } = require('./data.service');
 
 class UserService {
-  // Lấy toàn bộ danh sách User kèm theo tên Quyền (Dành cho Admin/Manager)
   async getAllUsers() {
-    const pool = await poolPromise;
-    const result = await pool.request().query(`
-      SELECT u.Id, u.Username, u.Email, u.IsVerified, u.IsBanned, u.CreatedAt, r.Name AS Role
-      FROM Users u
-      JOIN Roles r ON u.RoleId = r.Id
-      ORDER BY u.CreatedAt DESC
-    `);
-    return result.recordset;
+    return mutateLocalData(async (db) =>
+      db.users
+        .map((user) => ({
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+          isVerified: user.isVerified,
+          isBanned: user.isBanned,
+          createdAt: user.createdAt
+        }))
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    );
   }
 
-  // Cập nhật trạng thái Khóa/Mở khóa tài khoản user
   async toggleBanUser(targetUserId, isBanned) {
-    const pool = await poolPromise;
-    await pool.request()
-      .input("userId", sql.Int, targetUserId)
-      .input("isBanned", sql.Bit, isBanned ? 1 : 0)
-      .query("UPDATE Users SET IsBanned = @isBanned WHERE Id = @userId");
-    return true;
+    return mutateLocalData(async (db) => {
+      const user = db.users.find((entry) => entry.id === Number(targetUserId));
+      if (!user) {
+        throw new AppError('User not found', 404);
+      }
+
+      user.isBanned = Boolean(isBanned);
+      return user;
+    });
   }
 }
 

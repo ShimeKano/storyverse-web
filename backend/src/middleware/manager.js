@@ -1,16 +1,13 @@
-const managerMiddleware = (req, res, next) => {
+const { AppError } = require('../lib/errors');
+
+module.exports = (req, res, next) => {
   if (!req.user) {
-    return res.status(401).json({ message: "Unauthorized. Please log in." });
+    return next(new AppError('Unauthorized', 401));
   }
 
-  const role = req.user.role;
-
-  // Cho phép cả ADMIN và MANAGER đi qua
-  if (role === "ADMIN" || role === "MANAGER") {
-    next();
-  } else {
-    return res.status(403).json({ message: "Access denied. Managers or Admins only." });
+  if (!['ADMIN', 'MANAGER'].includes(req.user.role)) {
+    return next(new AppError('Access denied. Manager/Admin only.', 403));
   }
+
+  return next();
 };
-
-module.exports = managerMiddleware;

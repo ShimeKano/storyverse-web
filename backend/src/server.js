@@ -1,52 +1,43 @@
-const express = require("express");
-const cors = require("cors");
-require("dotenv").config(); // Kích hoạt đọc file môi trường khi chạy test
+const express = require('express');
+const cors = require('cors');
+const env = require('./config/env');
+const { getAzureRuntimeConfig } = require('./config/azure');
+const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
-// Cấu hình Middleware cơ bản
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // Hỗ trợ đọc form data nếu cần
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true }));
 
-// ─── ĐƯỜNG DẪN KIỂM TRA HỆ THỐNG ──────────────────────────────────────
-app.get("/health", (req, res) => {
+app.get('/health', (req, res) => {
   res.json({
-    status: "OK",
-    message: "Backend is running",
-    time: new Date().toISOString(),
+    status: 'OK',
+    message: 'StoryVerse backend is running',
+    provider: env.DATA_PROVIDER,
+    azure: getAzureRuntimeConfig(),
+    time: new Date().toISOString()
   });
 });
 
-app.get("/", (req, res) => {
-  res.send("Game Web Backend API Running 🚀");
+app.get('/', (req, res) => {
+  res.send('StoryVerse API Running');
 });
 
-// ─── KẾT NỐI ROUTER (Sau này bạn viết code tới đâu thì mở comment tới đó) ───
-app.use("/api/auth", require("./routes/auth.routes"));
-app.use("/api/profile", require("./routes/profile.routes"));
-app.use("/api/admin", require("./routes/admin.routes"));
-app.use("/api/users", require("./routes/user.routes"));
-// app.use("/api/stories", require("./routes/story.routes"));
-// app.use("/api/game", require("./routes/game.routes"));
+app.use('/api/auth', require('./routes/auth.routes'));
+app.use('/api/profile', require('./routes/profile.routes'));
+app.use('/api/users', require('./routes/user.routes'));
+app.use('/api/admin', require('./routes/admin.routes'));
+app.use('/api/stories', require('./routes/story.routes'));
+app.use('/api/game', require('./routes/game.routes'));
+app.use('/api/ranking', require('./routes/ranking.routes'));
 
-// ─── XỬ LÝ LỖI (ERROR HANDLING) ──────────────────────────────────────
-// Middleware xử lý khi không tìm thấy route (404)
-app.use((req, res, next) => {
-  res.status(404).json({ message: "API Route Not Found" });
+app.use((req, res) => {
+  res.status(404).json({ message: 'API route not found' });
 });
 
-// Middleware xử lý lỗi hệ thống (500)
-app.use((err, req, res, next) => {
-  console.error("🔥 Server Error:", err.stack || err);
-  res.status(500).json({ 
-    message: "Internal Server Error",
-    error: process.env.NODE_ENV === "development" ? err.message : undefined // Chỉ lộ lỗi chi tiết khi test
-  });
-});
+app.use(errorHandler);
 
-// ─── KHỞI CHẠY SERVER ────────────────────────────────────────────────
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
+app.listen(env.PORT, () => {
+  console.log(`🚀 Server is running on port ${env.PORT}`);
 });

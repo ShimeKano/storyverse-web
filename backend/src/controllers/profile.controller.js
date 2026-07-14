@@ -1,21 +1,19 @@
-const profileService = require("../services/profile.service");
+const profileService = require('../services/profile.service');
 
 class ProfileController {
   async getMyProfile(req, res, next) {
     try {
-      // req.user lấy từ Middleware Auth sau khi giải mã token thành công
-      const userId = req.user.id; 
+      const data = await profileService.getProfileData(req.user.id);
+      res.status(200).json({ message: 'Get profile successfully', data });
+    } catch (error) {
+      next(error);
+    }
+  }
 
-      const profileData = await profileService.getProfileData(userId);
-
-      if (!profileData.profile) {
-        return res.status(404).json({ message: "Profile not found" });
-      }
-
-      res.status(200).json({
-        message: "Get profile successfully! 💖",
-        data: profileData
-      });
+  async updateMyProfile(req, res, next) {
+    try {
+      const data = await profileService.updateProfile(req.user.id, req.body);
+      res.status(200).json({ message: 'Profile updated successfully', data });
     } catch (error) {
       next(error);
     }
