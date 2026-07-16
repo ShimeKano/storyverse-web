@@ -23,17 +23,20 @@ jobs:
         with:
           node-version: '22.x'
 
+      # 🛠️ SỬA CHỖ 1: Thêm "working-directory: backend" để chạy lệnh cài đặt trong thư mục backend
       - name: npm install, build, and test
+        working-directory: backend
         run: |
           npm install
           npm run build --if-present
           npm run test --if-present
 
+      # 🛠️ SỬA CHỖ 2: Thay đổi "path: ." thành "path: backend" để chỉ đóng gói và gửi mỗi thư mục backend lên Azure
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .
+          path: backend
 
   deploy:
     runs-on: ubuntu-latest
@@ -47,7 +50,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
-      
+          
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -62,4 +65,3 @@ jobs:
           app-name: 'storyverse-web-app'
           slot-name: 'Production'
           package: .
-          
