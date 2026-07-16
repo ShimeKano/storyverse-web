@@ -110,7 +110,7 @@ cd frontend && npm run build
 ```
 
 ## Bảo mật
-.
+
 - Không hardcode secrets
 - Token JWT từ env (`JWT_SECRET`)
 - Input validation ở service layer
