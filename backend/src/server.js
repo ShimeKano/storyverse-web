@@ -48,3 +48,9 @@ app.use(errorHandler);
 app.listen(env.PORT, () => {
   console.log(`🚀 Server is running on port ${env.PORT}`);
 });
+app.get('/api/test', (req, res) => {
+    res.json({
+        ok: true,
+        version: "v1.0.3"
+    });
+});
