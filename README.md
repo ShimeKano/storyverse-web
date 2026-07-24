@@ -1,117 +1,463 @@
-# StoryVerse Web
+# 🎮 StoryVerse Web Game
+> Interactive Story + RPG Platform
 
-Interactive Horror & RPG Story Platform với các khu vực:
+---
 
-- Đăng tải truyện/chapter/asset (JSON story graph)
-- Phần chơi (interactive choices + nhiều ending)
-- Bảng xếp hạng
-- Thông tin người chơi (profile/progress/inventory)
-- Admin / Manager only (duyệt truyện, quản lý user)
+# 📖 Giới thiệu
 
-## Kiến trúc
+StoryVerse là nền tảng cho phép người dùng:
 
-- **Frontend:** React + Vite (`/frontend`)
-- **Backend API:** Node.js + Express (`/backend`)
-- **Data provider:**
-  - Local JSON (mặc định, chạy ngay)
-  - Azure SQL (đã có config + service layer fallback)
-- **Azure readiness:** Env config cho Azure SQL / Blob Storage / Cosmos DB
+- Chơi truyện tương tác nhiều kết thúc
+- Tạo truyện bằng giao diện trực quan (không cần biết lập trình)
+- Chơi RPG ngay trong trình duyệt
+- Chia sẻ truyện với cộng đồng
+- Xếp hạng người chơi và tác giả
+- Phát triển hệ thống nhiệm vụ, vật phẩm và nhân vật
 
-## Chạy local
+Frontend được deploy trên **Vercel**.
 
-### 1) Backend
+Backend được deploy trên **Azure App Service**.
 
-```bash
-cd backend
-cp .env.example .env
-npm ci
-npm run dev
+Database sử dụng **Azure SQL Database**.
+
+---
+
+# 🏗️ Kiến trúc
+
+```
+Frontend (React + Vite)
+        │
+        ▼
+Azure App Service (Express API)
+        │
+        ▼
+Azure SQL Database
+
+        │
+        ▼
+Azure Blob Storage (Image / Audio / Video)
+
+        │
+        ▼
+Future
+Azure Cosmos DB
+Redis
+SignalR
 ```
 
-Backend chạy tại `http://localhost:5000`
+---
 
-### 2) Frontend
+# 🛣️ ROADMAP
 
-```bash
-cd frontend
-cp .env.example .env
-npm ci
-npm run dev
+---
+
+# ✅ PHASE 1
+## Foundation
+
+Mục tiêu
+
+Xây dựng hệ thống nền.
+
+### Authentication
+
+- [x] Register
+- [x] Login
+- [x] JWT
+- [x] Logout
+
+### Backend
+
+- [x] Express
+- [x] Azure Deploy
+- [x] SQL Connection
+- [x] API Health
+
+### Story
+
+- [x] Upload Story
+- [x] Upload JSON
+- [x] Draft
+- [x] Approve
+
+### User
+
+- [x] Profile
+- [x] Ranking
+
+---
+
+# 🚀 PHASE 2
+# Story Editor (Quan trọng nhất)
+
+Không dùng JSON nữa.
+
+Người dùng sẽ kéo thả.
+
+```
+(Start)
+
+     |
+
+Node 1
+
+ /   \
+
+A     B
+
+|      |
+
+Node2 Node3
+
+ \    /
+
+ Ending
 ```
 
-Frontend chạy tại `http://localhost:5173`
+---
 
-## Tài khoản seed mẫu
+## Chức năng
 
-Dữ liệu seed nằm ở: `backend/src/data/local-db.json`
+### Story Canvas
 
-- `admin / Password123!` (ADMIN)
-- `manager / Password123!` (MANAGER)
-- `player / Password123!` (PLAYER)
+- [ ] React Flow
+- [ ] Zoom
+- [ ] Drag
+- [ ] Pan
 
-Story mẫu hoàn chỉnh:
-- **Cánh Cửa Đêm Mưa** (nhiều lựa chọn, nhiều ending)
+---
 
-## Cấu hình môi trường
+### Story Node
 
-### Backend `.env`
+Mỗi Node gồm
 
-- `DATA_PROVIDER=local` để chạy local JSON fallback.
-- Để dùng Azure SQL:
-  1. Đặt `DATA_PROVIDER=azure`
-  2. Đặt `AZURE_SQL_ENABLED=true`
-  3. Cấu hình đủ `AZURE_SQL_SERVER`, `AZURE_SQL_DATABASE`, `AZURE_SQL_USER`, `AZURE_SQL_PASSWORD`
+- [ ] Title
+- [ ] Content
+- [ ] Image
+- [ ] GIF
+- [ ] Video
+- [ ] Audio
+- [ ] EXP
+- [ ] Gold
+- [ ] HP
+- [ ] Item
+- [ ] Ending
 
-Nếu Azure SQL lỗi hoặc thiếu config, backend tự fallback sang local store.
+---
 
-### Frontend `.env`
+### Choice
 
-- `VITE_API_BASE_URL=http://localhost:5000/api`
+Mỗi lựa chọn gồm
 
-## Kết nối CSDL ở implementation hiện tại
+- [ ] Text
+- [ ] Next Node
+- [ ] Điều kiện
+- [ ] Tăng EXP
+- [ ] Trừ HP
+- [ ] Thêm Item
+- [ ] Xóa Item
 
-- Mặc định: đọc/ghi từ `backend/src/data/local-db.json`
-- Azure: service layer có trong `backend/src/config/database.js` + `backend/src/config/azure.js`
-- Có thể migrate dữ liệu local sang Azure SQL bằng schema ở `database/schema.sql`
+---
 
-## Azure setup từng bước
+### Preview
 
-1. Tạo Azure SQL Database + firewall rule cho app host.
-2. Import schema từ `database/schema.sql`.
-3. (Tùy chọn) Tạo Azure Storage account và container `story-assets`.
-4. Cập nhật `.env` backend bằng thông số Azure.
-5. Deploy backend (App Service) + frontend (Static Web Apps).
-6. Kiểm tra `GET /health` để xác nhận runtime config.
+- [ ] Play Story
+- [ ] Test Ending
+- [ ] Auto Save
 
-## Route guards và phân quyền
+---
 
-- Frontend:
-  - `ProtectedRoute`: yêu cầu login
-  - `RoleRoute`: chặn theo role (`ADMIN`, `MANAGER`)
-- Backend:
-  - `authRequired`
-  - `manager` middleware (ADMIN/MANAGER only)
-  - `admin` middleware (ADMIN only)
+### Validate
 
-## Checklist kiểm thử nhanh
+- [ ] Thiếu Ending
+- [ ] Thiếu Start
+- [ ] Node mồ côi
+- [ ] Choice lỗi
+- [ ] Loop Detection
 
-1. Login bằng `player`
-2. Vào **Phần chơi** và hoàn thành story mẫu tới ending
-3. Vào **Thông tin người chơi** kiểm tra hearts/exp/endings
-4. Vào **Đăng tải** tạo truyện mới và gửi duyệt
-5. Login `manager` duyệt truyện ở **Admin/Manager**
-6. Mở **Bảng xếp hạng** kiểm tra score cập nhật
+---
 
-## Lệnh kiểm tra chất lượng
+### Export
 
-```bash
-cd backend && npm test
-cd frontend && npm run build
+- [ ] Export JSON
+- [ ] Import JSON
+
+---
+
+# 🚀 PHASE 3
+# Story Player
+
+Trang đọc truyện thật.
+
+```
+Ảnh
+
+Bạn bước vào căn phòng.
+
+Có tiếng khóc.
+
+[Mở cửa]
+
+[Bỏ chạy]
+
+[Trốn]
 ```
 
-## Bảo mật
+---
 
-- Không hardcode secrets
-- Token JWT từ env (`JWT_SECRET`)
-- Input validation ở service layer
-- Error handling thống nhất qua middleware
+## Giao diện
+
+- [ ] Typing Effect
+- [ ] Fade Animation
+- [ ] Background Music
+- [ ] Sound Effect
+- [ ] Video Background
+- [ ] GIF
+
+---
+
+## Save
+
+- [ ] Continue
+- [ ] Auto Save
+- [ ] Save Slot
+
+---
+
+# 🚀 PHASE 4
+# Player System
+
+## HP
+
+❤❤❤❤❤
+
+---
+
+## EXP
+
+- [ ] Level
+- [ ] EXP
+- [ ] Skill Point
+
+---
+
+## Inventory
+
+- [ ] Key
+- [ ] Knife
+- [ ] Gun
+- [ ] Book
+- [ ] Potion
+- [ ] Flashlight
+
+---
+
+## Achievement
+
+- [ ] Hidden Ending
+- [ ] 100% Ending
+- [ ] Speed Run
+
+---
+
+# 🚀 PHASE 5
+# RPG System
+
+## Character
+
+- [ ] Class
+- [ ] Level
+- [ ] Skill
+
+---
+
+## Combat
+
+- [ ] Turn Base
+- [ ] Boss
+- [ ] Damage
+
+---
+
+## NPC
+
+- [ ] Shop
+- [ ] Quest
+- [ ] Dialogue
+
+---
+
+## Item
+
+- [ ] Weapon
+- [ ] Armor
+- [ ] Consumable
+
+---
+
+# 🚀 PHASE 6
+# Community
+
+## Story
+
+- [ ] Like
+- [ ] Rating
+- [ ] Comment
+
+---
+
+## User
+
+- [ ] Follow
+- [ ] Favorite
+- [ ] Collection
+
+---
+
+## Feed
+
+- [ ] Trending
+- [ ] New Story
+- [ ] Popular Author
+
+---
+
+# 🚀 PHASE 7
+# Admin Panel
+
+Dashboard
+
+- [ ] User
+- [ ] Story
+- [ ] Report
+- [ ] Income
+
+---
+
+## Story
+
+- [ ] Approve
+- [ ] Reject
+- [ ] Delete
+
+---
+
+## User
+
+- [ ] Ban
+- [ ] Unban
+- [ ] Reset Password
+
+---
+
+# 🚀 PHASE 8
+# Monetization
+
+- [ ] Google Ads
+- [ ] Premium
+- [ ] VIP
+- [ ] Donate
+
+---
+
+## Heart
+
+- [ ] Buy Heart
+- [ ] Watch Ads
+- [ ] Daily Reward
+
+---
+
+## Shop
+
+- [ ] Avatar
+- [ ] Theme
+- [ ] Frame
+
+---
+
+# 🚀 PHASE 9
+# Polish
+
+## UI
+
+- [ ] Dark Mode
+- [ ] Animation
+- [ ] Mobile
+
+---
+
+## Login
+
+- [ ] Google
+- [ ] Discord
+- [ ] Facebook
+
+---
+
+## Notification
+
+- [ ] Email
+- [ ] Push
+- [ ] Discord Webhook
+
+---
+
+## Performance
+
+- [ ] Cache
+- [ ] Lazy Load
+- [ ] SEO
+
+---
+
+# 📂 Folder Structure
+
+```
+frontend/
+
+backend/
+
+database/
+
+docs/
+
+assets/
+
+scripts/
+```
+
+---
+
+# 🎯 Mục tiêu cuối cùng
+
+StoryVerse sẽ là nền tảng nơi người dùng:
+
+- Không cần biết lập trình vẫn tạo được truyện.
+- Kéo thả để tạo nhiều nhánh và nhiều kết thúc.
+- Chơi truyện tương tác và RPG trong cùng một hệ thống.
+- Chia sẻ truyện với cộng đồng.
+- Có hệ thống xếp hạng, thành tựu và kiếm tiền từ nội dung.
+
+---
+
+# 📌 Tiến độ
+
+```
+Phase 1  ██████████ 100%
+
+Phase 2  ░░░░░░░░░░   0%
+
+Phase 3  ░░░░░░░░░░   0%
+
+Phase 4  ░░░░░░░░░░   0%
+
+Phase 5  ░░░░░░░░░░   0%
+
+Phase 6  ░░░░░░░░░░   0%
+
+Phase 7  ░░░░░░░░░░   0%
+
+Phase 8  ░░░░░░░░░░   0%
+
+Phase 9  ░░░░░░░░░░   0%
+```
