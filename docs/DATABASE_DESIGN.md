@@ -1,32 +1,30 @@
 # Database Design
 
-## Local runtime store (current implementation)
+Core Tables
 
-File: `backend/src/data/local-db.json`
+- Roles
+- Users
+- Profiles
+- UserHearts
 
-Collections:
-- `users`
-- `profiles`
-- `hearts`
-- `inventory`
-- `stories`
-- `storyNodes`
-- `storyChoices`
-- `progress`
-- `endings`
+Story System
 
-## Azure SQL target schema
+- Stories
+- StoryNodes
+- StoryChoices
 
-SQL schema template: `database/schema.sql`
+Progress
 
-Core entities:
-- Roles, Users, Profiles, UserHearts
-- Stories, StoryNodes, StoryChoices
-- Inventory / Payments (future-ready)
+- UserStoryProgress
+- UserStoryEndings
 
-## Migration strategy
+Community
 
-1. Keep API contracts stable.
-2. Replace local data-service methods bằng Azure SQL repository tương ứng.
-3. Dùng `DATA_PROVIDER=azure` để switch provider.
-4. Nếu Azure unavailable, backend fallback local để không downtime local/dev.
+- StoryRatings
+
+Future
+
+- RPGCharacters
+- RPGItems
+- Payments
+- Advertisements
