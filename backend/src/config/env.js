@@ -7,6 +7,10 @@ const env = {
   HEART_RECOVER_MINUTES: Number(process.env.HEART_RECOVER_MINUTES || 15),
   JWT_SECRET: process.env.JWT_SECRET || 'dev-only-change-me',
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
+  CORS_ORIGINS: (process.env.CORS_ORIGINS || 'http://localhost:5173')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean),
   AZURE_SQL: {
     enabled: String(process.env.AZURE_SQL_ENABLED || 'false').toLowerCase() === 'true',
     server: process.env.AZURE_SQL_SERVER || process.env.DB_SERVER || '',
