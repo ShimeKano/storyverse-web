@@ -6,9 +6,15 @@ const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
-// 🛠️ SỬA CHỖ NÀY: Cấu hình CORS chi tiết để cho phép Frontend (Vercel) kết nối mà không bị trình duyệt chặn
 app.use(cors({
-  origin: '*', // Cho phép tất cả các nguồn truy cập. Hoặc bạn có thể điền link Vercel của bạn vào đây (ví dụ: 'https://xxx.vercel.app')
+  origin: (origin, callback) => {
+    // Allow non-browser/server-to-server requests without an Origin header.
+    if (!origin) return callback(null, true);
+    if (env.CORS_ORIGINS.includes('*') || env.CORS_ORIGINS.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS origin not allowed: ${origin}`));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -48,9 +54,7 @@ app.use(errorHandler);
 app.listen(env.PORT, () => {
   console.log(`🚀 Server is running on port ${env.PORT}`);
 });
+
 app.get('/api/test', (req, res) => {
-    res.json({
-        ok: true,
-        version: "v1.0.3"
-    });
+  res.json({ ok: true, version: 'v1.0.3' });
 });
