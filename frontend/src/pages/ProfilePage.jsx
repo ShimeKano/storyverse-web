@@ -12,9 +12,15 @@ export default function ProfilePage() {
       api.get('/stories?includeOwnDrafts=true')
     ]);
 
-    setProfile(profileResponse.data);
-    const userId = profileResponse.data?.user?.id ?? profileResponse.data?.profile?.userId;
-    setStories((storiesResponse.data || []).filter((story) => story.authorId === userId));
+    const profileData = profileResponse.data;
+    const userId = profileData?.profile?.userId;
+
+    setProfile(profileData);
+    setStories(
+      (storiesResponse.data || []).filter(
+        (story) => Number(story.authorId) === Number(userId)
+      )
+    );
   }
 
   useEffect(() => {
