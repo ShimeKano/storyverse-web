@@ -75,6 +75,36 @@ button {
   cursor: pointer;
 }
 
+.mode-switch {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.mode-switch button.active {
+  border-color: #91b4ff;
+  background: #252542;
+}
+
+.drag-zone {
+  min-height: 140px;
+  margin-bottom: 1rem;
+  border: 2px dashed #4a4a68;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  text-align: center;
+}
+
+.drag-zone.is-dragging {
+  border-color: #91b4ff;
+  background: #19192b;
+}
+
 ul {
   padding-left: 1rem;
 }
