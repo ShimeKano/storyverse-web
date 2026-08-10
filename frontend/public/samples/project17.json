@@ -1,0 +1,55 @@
+{
+  "title": "Project 17: Căn Phòng Không Có Cửa",
+  "description": "Một thử nghiệm kinh dị ngắn với nhiều lựa chọn và ba kết thúc.",
+  "type": "HORROR",
+  "status": "DRAFT",
+  "thumbnail": "",
+  "nodes": [
+    {
+      "clientId": "start",
+      "title": "Hành lang",
+      "content": "Bạn tỉnh dậy trong một hành lang tối. Cuối hành lang có một căn phòng mang số 17.",
+      "isStart": true,
+      "isEnding": false,
+      "choices": [
+        { "text": "Mở phòng 17", "nextClientId": "room" },
+        { "text": "Quay lại", "nextClientId": "escape" }
+      ]
+    },
+    {
+      "clientId": "room",
+      "title": "Phòng 17",
+      "content": "Căn phòng hoàn toàn trống rỗng, ngoại trừ một chiếc gương phủ đầy hơi nước.",
+      "isStart": false,
+      "isEnding": false,
+      "choices": [
+        { "text": "Lau gương", "nextClientId": "truth" },
+        { "text": "Đập gương", "nextClientId": "bad" }
+      ]
+    },
+    {
+      "clientId": "escape",
+      "title": "Thoát thân",
+      "content": "Bạn chạy khỏi tòa nhà trước khi tiếng bước chân phía sau kịp đuổi tới.",
+      "isStart": false,
+      "isEnding": true,
+      "endingType": "HAPPY_END"
+    },
+    {
+      "clientId": "truth",
+      "title": "Sự thật",
+      "content": "Trong gương là chính bạn, nhưng phiên bản trong gương đang mỉm cười trước khi bạn kịp làm vậy.",
+      "isStart": false,
+      "isEnding": true,
+      "endingType": "TRUE_END"
+    },
+    {
+      "clientId": "bad",
+      "title": "Vỡ vụn",
+      "content": "Mảnh gương rơi xuống. Tất cả ánh đèn trong hành lang tắt cùng một lúc.",
+      "isStart": false,
+      "isEnding": true,
+      "endingType": "BAD_END"
+    }
+  ]
+}
