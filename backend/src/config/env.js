@@ -1,9 +1,11 @@
 require('dotenv').config();
 
+const azureSqlEnabled = String(process.env.AZURE_SQL_ENABLED || 'false').toLowerCase() === 'true';
+
 const env = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   PORT: Number(process.env.PORT || 5000),
-  DATA_PROVIDER: (process.env.DATA_PROVIDER || 'local').toLowerCase(),
+  DATA_PROVIDER: (process.env.DATA_PROVIDER || (azureSqlEnabled ? 'azure' : 'local')).toLowerCase(),
   HEART_RECOVER_MINUTES: Number(process.env.HEART_RECOVER_MINUTES || 15),
   JWT_SECRET: process.env.JWT_SECRET || 'dev-only-change-me',
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
@@ -17,7 +19,7 @@ const env = {
     .map((origin) => origin.trim().replace(/\/$/, ''))
     .filter(Boolean),
   AZURE_SQL: {
-    enabled: String(process.env.AZURE_SQL_ENABLED || 'false').toLowerCase() === 'true',
+    enabled: azureSqlEnabled,
     server: process.env.AZURE_SQL_SERVER || process.env.DB_SERVER || '',
     database: process.env.AZURE_SQL_DATABASE || process.env.DB_DATABASE || process.env.DB_NAME || '',
     user: process.env.AZURE_SQL_USER || process.env.DB_USER || '',

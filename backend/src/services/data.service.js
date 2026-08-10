@@ -1,25 +1,4 @@
-const fs = require('fs/promises');
-const path = require('path');
-const env = require('../config/env');
-const { getPool } = require('../config/database');
-
-const dataPath = path.join(__dirname, '..', 'data', 'local-db.json');
-
-async function readLocalData() {
-  const raw = await fs.readFile(dataPath, 'utf8');
-  return JSON.parse(raw);
-}
-
-async function writeLocalData(data) {
-  await fs.writeFile(dataPath, JSON.stringify(data, null, 2));
-}
-
-async function mutateLocalData(mutator) {
-  const db = await readLocalData();
-  const result = await mutator(db);
-  await writeLocalData(db);
-  return result;
-}
+const stateRepository = require('../repositories/state.repository');
 
 function getNextId(db, key) {
   const next = db.meta.nextIds[key] || 1;
@@ -27,13 +6,26 @@ function getNextId(db, key) {
   return next;
 }
 
+async function readLocalData() {
+  return stateRepository.readState();
+}
+
+async function writeLocalData(data) {
+  return stateRepository.writeState(data);
+}
+
+async function mutateLocalData(mutator) {
+  return stateRepository.mutateState(mutator);
+}
+
 async function getDataProvider() {
-  if (env.DATA_PROVIDER === 'azure') {
-    const pool = await getPool();
+  if (stateRepository.usesAzureSql) {
+    const pool = await require('../config/database').getPool();
     if (pool) {
       return { type: 'azure', pool };
     }
   }
+
   return { type: 'local' };
 }
 
@@ -43,5 +35,5 @@ module.exports = {
   mutateLocalData,
   getNextId,
   getDataProvider,
-  dataPath
+  dataPath: stateRepository.dataPath
 };
