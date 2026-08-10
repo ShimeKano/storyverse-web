@@ -7,7 +7,6 @@ const errorHandler = require('./middleware/errorHandler');
 const app = express();
 
 app.use(cors({
-  origin:*
   origin: (origin, callback) => {
     // Allow non-browser/server-to-server requests without an Origin header.
     if (!origin) return callback(null, true);
