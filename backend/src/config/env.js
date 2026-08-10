@@ -7,9 +7,14 @@ const env = {
   HEART_RECOVER_MINUTES: Number(process.env.HEART_RECOVER_MINUTES || 15),
   JWT_SECRET: process.env.JWT_SECRET || 'dev-only-change-me',
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
-  CORS_ORIGINS: (process.env.CORS_ORIGINS || 'http://localhost:5173')
+  CORS_ORIGINS: (process.env.CORS_ORIGINS || [
+    'http://localhost:5173',
+    'http://localhost:4173',
+    'https://storyverse-web-lake.vercel.app',
+    'https://storyverse-e9k15dwi5-shime1kano.vercel.app'
+  ].join(','))
     .split(',')
-    .map((origin) => origin.trim())
+    .map((origin) => origin.trim().replace(/\/$/, ''))
     .filter(Boolean),
   AZURE_SQL: {
     enabled: String(process.env.AZURE_SQL_ENABLED || 'false').toLowerCase() === 'true',
