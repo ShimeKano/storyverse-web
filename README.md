@@ -19,6 +19,7 @@ Frontend được deploy trên **Vercel**.
 Backend được deploy trên **Azure App Service**.
 
 Database sử dụng **Azure SQL Database**.
+update: fix issues database blank.
 
 ---
 
