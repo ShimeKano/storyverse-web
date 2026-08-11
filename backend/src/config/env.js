@@ -13,7 +13,8 @@ const env = {
     'http://localhost:5173',
     'http://localhost:4173',
     'https://storyverse-web-lake.vercel.app',
-    'https://storyverse-e9k15dwi5-shime1kano.vercel.app'
+    'https://storyverse-e9k15dwi5-shime1kano.vercel.app',
+    'https://storyverse-web-git-feature-azure-sql-migration-shime1kano.vercel.app'
   ].join(','))
     .split(',')
     .map((origin) => origin.trim().replace(/\/$/, ''))
