@@ -52,9 +52,20 @@ async function writeState(state) {
     .input('id', STATE_ID)
     .input('stateJson', JSON.stringify(state))
     .query(`
-      UPDATE StoryVerseState
-      SET stateJson = @stateJson, updatedAt = SYSUTCDATETIME()
-      WHERE id = @id
+      IF EXISTS (
+  SELECT 1 FROM StoryVerseState WHERE id = @id
+)
+BEGIN
+  UPDATE StoryVerseState
+  SET stateJson = @stateJson,
+      updatedAt = SYSUTCDATETIME()
+  WHERE id = @id
+END
+ELSE
+BEGIN
+  INSERT INTO StoryVerseState(id, stateJson, updatedAt)
+  VALUES(@id, @stateJson, SYSUTCDATETIME())
+END
     `);
 
   return state;
