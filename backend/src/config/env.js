@@ -12,6 +12,8 @@ const env = {
   CORS_ORIGINS: (process.env.CORS_ORIGINS || [
     'http://localhost:5173',
     'http://localhost:4173',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:4173',
     'https://storyverse-web-lake.vercel.app',
     'https://storyverse-e9k15dwi5-shime1kano.vercel.app',
     'https://storyverse-web-git-feature-azure-sql-migration-shime1kano.vercel.app'

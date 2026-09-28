@@ -1,9 +1,9 @@
 const express = require('express');
 const authController = require('../controllers/auth.controller');
 
-const rateLimit = require('express-rate-limit');
+const createApiRateLimit = require('../middleware/apiRateLimit');
 const router = express.Router();
-router.use(rateLimit({ windowMs: 60 * 1000, max: 120, standardHeaders: true, legacyHeaders: false, validate: { ip: false } }));
+router.use(createApiRateLimit());
 
 router.post('/register', authController.register);
 router.post('/login', authController.login);

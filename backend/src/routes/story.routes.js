@@ -2,9 +2,9 @@ const express = require('express');
 const storyController = require('../controllers/story.controller');
 const { authRequired, authOptional } = require('../middleware/auth');
 
-const rateLimit = require('express-rate-limit');
+const createApiRateLimit = require('../middleware/apiRateLimit');
 const router = express.Router();
-router.use(rateLimit({ windowMs: 60 * 1000, max: 120, standardHeaders: true, legacyHeaders: false, validate: { ip: false }, keyGenerator(req) { return req.ip.replace(/:\d+$/, ''); } }));
+router.use(createApiRateLimit());
 
 router.get('/', authOptional, storyController.list);
 router.get('/:id', authOptional, storyController.getById);
