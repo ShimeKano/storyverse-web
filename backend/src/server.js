@@ -46,6 +46,10 @@ app.use('/api/stories', require('./routes/story.routes'));
 app.use('/api/game', require('./routes/game.routes'));
 app.use('/api/ranking', require('./routes/ranking.routes'));
 
+app.get('/api/test', (req, res) => {
+  res.json({ ok: true, version: 'v1.0.3' });
+});
+
 app.use((req, res) => {
   res.status(404).json({ message: 'API route not found' });
 });
@@ -54,8 +58,4 @@ app.use(errorHandler);
 
 app.listen(env.PORT, () => {
   console.log(`🚀 Server is running on port ${env.PORT}`);
-});
-
-app.get('/api/test', (req, res) => {
-  res.json({ ok: true, version: 'v1.0.3' });
 });
